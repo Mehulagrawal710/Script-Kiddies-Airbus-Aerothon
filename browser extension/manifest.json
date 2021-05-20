@@ -11,8 +11,23 @@
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>", "http://*/*"],
-			"js": ["script/content.js"],
-			"css": ["style/styles.css"]
+			"css": [
+				"style/content.css",
+				"style/bootstrap/css/bootstrap.css",
+				"style/bootstrap/css/bootstrap.min.css",
+				"style/bootstrap/css/bootstrap-grid.css",
+				"style/bootstrap/css/bootstrap-grid.min.css",
+				"style/bootstrap/css/bootstrap-reboot.css",
+				"style/bootstrap/css/bootstrap-reboot.min.css"
+			],
+			"js": [
+				"script/content.js"
+				// "style/bootstrap/js/bootstrap.js",
+				// "style/bootstrap/js/bootstrap.min.js",
+				// "style/bootstrap/js/bootstrap.bundle.js",
+				// "style/bootstrap/js/bootstrap.bundle.min.js"
+			]
 		}
-	]
+	],
+	"web_accessible_resources": ["style/content.css"]
 }
