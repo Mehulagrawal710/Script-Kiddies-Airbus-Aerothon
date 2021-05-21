@@ -1,5 +1,7 @@
 package Aerothon.prototype.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import Aerothon.prototype.dtos.ResponseMsgDTO;
@@ -54,4 +57,15 @@ public class LoginController {
 		return new ResponseEntity<>(new TokenDTO(token), HttpStatus.OK);
 	}
 
+	@PostMapping("/userinfo")
+	public ResponseEntity<Map<String, Integer>> postAnswer(@RequestHeader("token") String token) {
+		Tokens tokenEntry = tokensRepo.findOneByToken(token);
+		String userId = tokenEntry.getUserId();
+		UserDetails user = userDetailsRepo.findById(userId).orElse(null);
+		Map<String, Integer> map = new HashMap<>();
+		map.put("totalScore", user.getTotalScore());
+		map.put("noOfQuestionsAnswered", user.getNoOfQueAnswered());
+		return new ResponseEntity<>(map, HttpStatus.OK);
+	}
+	
 }

@@ -11,6 +11,10 @@ var floatingButtonsHtml =
 `
 <!--=============== Floating Action Button ===============-->
 <div class="menu pmd-floating-action"  role="navigation">
+	<a id="announcementButton" href="javascript:void(0);" class="pmd-floating-action-btn btn btn-sm pmd-btn-fab pmd-btn-raised pmd-ripple-effect btn-default" data-title="Announcements">
+		<span class="pmd-floating-hidden">Announcements</span>
+		<i class="fa fa-bullhorn" aria-hidden="true"></i>
+	</a>
 	<a id="reputationButton" href="javascript:void(0);" class="pmd-floating-action-btn btn btn-sm pmd-btn-fab pmd-btn-raised pmd-ripple-effect btn-default" data-title="Your Reputation">
 		<span class="pmd-floating-hidden">Your Reputation</span>
 		<i class="fa fa-star-o" aria-hidden="true"></i>
@@ -107,7 +111,7 @@ var bugReportBoxHtml =
 		<br>
 		Please completely explain the error or bug you have encountered on thid page
 		<br><br>
-		<textarea class="form-control" id="answerTextArea" rows="6"></textarea>
+		<textarea class="form-control" id="bugReportTextArea" rows="6"></textarea>
 		<br>
 		<br>
 		<a href="#" id="submitBugReportButton" class="btn btn-primary">Submit Report</a>
@@ -129,6 +133,12 @@ var reputationBoxHtml =
 			<i class="fa fa-times circle" aria-hidden="true"></i>
 		</button>
 	</div>
+
+	username: <input id="form-username" type="text" class="form-control" placeholder="Username" required autofocus>
+	password: <input id="form-password" type="password" class="form-control" placeholder="Password" required>
+	email: <input id="form-email" type="email" class="form-control" placeholder="Email" required>
+    <button id="signinButton" class="btn btn-lg btn-primary btn-block text-uppercase">Sign in</button>
+    <button id="signupButton" class="btn btn-lg btn-primary btn-block text-uppercase">Sign up</button>
 
 	<div class="card-body">
 		<h1>Your Score</h1>
@@ -163,16 +173,40 @@ var kobotBoxHtml =
 var kobotBox = document.createElement("div");
 kobotBox.innerHTML = kobotBoxHtml;
 
+
+var announcementBoxHtml = 
+`
+<!--=============== Announcement Box ===============-->
+<div id="announcementBox" class="card text-center my-box">
+	<div class="card-header">
+		Announcements
+		<button type="button" class="btn btn-sm btn-danger boxClose">
+			<i class="fa fa-times circle" aria-hidden="true"></i>
+		</button>
+	</div>
+	<div id="suggestion">
+	</div>
+</div>
+`
+
+var announcementBox = document.createElement("div");
+announcementBox.innerHTML = announcementBoxHtml;
+
+
 document.body.appendChild(floatingButtons);
 document.body.appendChild(askSomethingBox);
 document.body.appendChild(answerBox);
 document.body.appendChild(bugReportBox);
 document.body.appendChild(reputationBox);
 document.body.appendChild(kobotBox);
+document.body.appendChild(announcementBox);
 
 
 /*======== Injecting JavaScript ========*/
-var listOfBoxIds = ["askSomethingBox", "bugReportBox", "reputationBox", "kobotBox"]
+
+var usertoken = window.localStorage.getItem('KonnexUserLoginToken');
+
+var listOfBoxIds = ["askSomethingBox", "bugReportBox", "reputationBox", "kobotBox", "announcementBox"];
 function closeAllBoxes(){
 	for (id of listOfBoxIds){
 		document.getElementById(id).style.display = "none";
@@ -300,7 +334,7 @@ document.getElementById('askQuestionButton').addEventListener('click', function(
 		    headers: {
 		      'Accept': 'application/json',
 		      'Content-Type': 'application/json',
-		      'token': '300a8498-124e-4081-9a3a-96e2ce5f961c'
+		      'token': usertoken
 		    },
 		    body: JSON.stringify(payload)
 		})
@@ -332,7 +366,7 @@ document.getElementById('submitAnswerButton').addEventListener('click', function
 		    headers: {
 		      'Accept': 'application/json',
 		      'Content-Type': 'application/json',
-		      'token': '300a8498-124e-4081-9a3a-96e2ce5f961c'
+		      'token': usertoken
 		    },
 		    body: JSON.stringify(payload)
 		})
@@ -350,12 +384,12 @@ document.getElementById('submitAnswerButton').addEventListener('click', function
 
 /*========= SHOW REPUTATION =============*/
 document.getElementById('reputationButton').addEventListener('click', function(){
-	fetch('http://localhost:8080/', {
+	fetch('http://localhost:8080/userinfo', {
 	    method: 'post',  
 	    headers: {
 	      'Accept': 'application/json',
 	      'Content-Type': 'application/json',
-	      'token': '300a8498-124e-4081-9a3a-96e2ce5f961c'
+	      'token': usertoken
 	    }
 	})
 	.then(response => response.json())
@@ -372,5 +406,128 @@ document.getElementById('reputationButton').addEventListener('click', function()
 /*========= SHOW KOBOT =============*/
 document.getElementById('chatbotButton').addEventListener('click', function(){	
 		document.getElementById("kobotBox").style.display = "block";
+	}
+);
+
+
+/*========= Announcement BOX =============*/
+askSomethingButton = document.getElementById("announcementButton");
+askSomethingButton.addEventListener('click', function(){
+	closeAllBoxes();	
+	var host = window.location.host;
+	console.log("Current HOST: " + host);
+	populateSuggestions(host);
+	document.getElementById("announcementBox").style.display = "block";
+	}
+);
+
+function populateSuggestions(pageUrl){
+    var payload = {
+        "pageUrl" : pageUrl
+    }
+    fetch('http://localhost:8080/suggestion/all', {
+        method: 'post',  
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(json => {
+        console.log(json);
+        document.getElementById('suggestion').innerHTML = "";
+        var index = 0;
+        for (sug of json){
+            index = index + 1;
+            var text = document.createTextNode(index + ". " + sug.suggestions);
+            var para = document.createElement("p");
+            para.appendChild(text);
+            document.getElementById('suggestion').appendChild(para);
+        }
+    })
+}
+
+document.getElementById('signinButton').addEventListener('click', function(){
+	var username = document.getElementById("form-username").value;
+	var password = document.getElementById("form-password").value;
+
+	var payload = {
+		"username" : username,
+		"password" : password
+	}
+	fetch('http://localhost:8080/signin', {
+	    method: 'post',  
+	    headers: {
+	      'Accept': 'application/json',
+	      'Content-Type': 'application/json'
+	    },
+	    body: JSON.stringify(payload)
+	})
+	.then(response => response.json())
+	.then(json => {
+		console.log(json);
+		window.localStorage.setItem('KonnexUserLoginToken', json.token);
+		usertoken = json.token;
+		window.alert("Signin Successful!");
+		closeAllBoxes();
+	})
+});
+
+document.getElementById('signupButton').addEventListener('click', function(){
+	var username = document.getElementById("form-username").value;
+	var password = document.getElementById("form-password").value;
+	var email = document.getElementById("form-email").value;
+
+	var payload = {
+		"username" : username,
+		"password" : password,
+		"email" : email
+	}
+	fetch('http://localhost:8080/signup', {
+	    method: 'post',  
+	    headers: {
+	      'Accept': 'application/json',
+	      'Content-Type': 'application/json'
+	    },
+	    body: JSON.stringify(payload)
+	})
+	.then(response => response.json())
+	.then(json => {
+		console.log(json);
+		window.alert("Signup Successful, Login now");
+	})
+});
+
+
+/*========= submit bug report =============*/
+document.getElementById('submitBugReportButton').addEventListener('click', function(){
+	var bug = document.getElementById('bugReportTextArea').value;
+	if(bug.length!=0){
+		var host = window.location.host;
+		console.log("Current HOST: " + host);
+
+		var payload = {
+			"pageUrl" : host,
+			"bug" : bug
+		}
+		fetch('http://localhost:8080/bug/add', {
+		    method: 'post',  
+		    headers: {
+		      'Accept': 'application/json',
+		      'Content-Type': 'application/json',
+		      'token': usertoken
+		    },
+		    body: JSON.stringify(payload)
+		})
+		.then(response => response.json())
+		.then(json => {
+			console.log(json);
+		})
+		
+		document.getElementById("bugReportTextArea").value = "";
+		window.alert("Your Bug has been reported!");
+		closeAllBoxes();
+	}
 	}
 );
