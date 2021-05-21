@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Konnex for companies</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link rel="stylesheet" href="../css/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
+	<script type="text/javascript" src="../script/popup.js"></script>
+
+<style type="text/css">
+
+.box{
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.25);
+    height: 70vh;
+    overflow-y: scroll;
+}
+
+.my-box{
+    width: 80vw;
+    height: 80vh;
+    position: fixed;
+    top: 10vh;
+    left: 10vw;
+    z-index: 5;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+}
+
+</style>
+</head>
+<body style="width: 97vw;padding: 10px;">
+<h2 style="text-align: center;">Konnex for Companies</h2>
+<br>
+<h3>DashBoard for domain: <span id="domain"></span></h3>
+<br>
+<div class="row" style="margin-left: 10px;">
+    <div class="col-md-4 box">
+        <h2 style="text-align: center;">FAQs</h2>
+        <hr>
+        <div id="faq">
+            
+        </div>
+    </div>
+    <div class="col-md-4 box">
+        <h2 style="text-align: center;">Bug Reports</h2>
+        <hr>
+        <div id="bug">
+            
+        </div>
+    </div>
+    <div class="col-md-4 box">
+        <h2 style="text-align: center;">Page Suggestions</h2>
+        <hr>
+        <textarea class="form-control" id="suggestionTextArea" rows="2"></textarea>
+        <center>
+            <a href="#" id="submitSuggestionButton" class="btn btn-primary">Add Suggestion</a>
+        </center>
+        <div id="suggestion">
+            
+        </div>
+    </div>
+</div>
+
+<!--=============== Answer Box ===============-->
+<div id="answerBox" class="card text-center my-box">
+    <div class="card-header">
+        <span>Answer this question below</span>
+        <button style="float: right;" id="answerBoxCloseButton" type="button" class="btn btn-sm btn-danger">
+            <i class="fa fa-times circle" aria-hidden="true">x</i>
+        </button>
+    </div>
+
+    <div class="card-body">
+        <h2 id="questionStatement"></h2>
+    </div>
+    <div class="card-footer text-muted">
+        <textarea class="form-control" id="answerTextArea" rows="5"></textarea>
+        <br><br>
+        <a href="#" id="submitAnswerButton" class="btn btn-primary">Submit Answer</a>
+    </div>
+</div>
+
+<script type="text/javascript">
+	
+    var token = window.localStorage.getItem('KonnexCompanyLoginToken');
+    var domain = window.localStorage.getItem('domain');
+
+    document.getElementById('domain').innerHTML = domain;
+
+    function populateFaqs(pageUrl){
+        var payload = {
+            "pageUrl" : pageUrl
+        }
+        fetch('http://localhost:8080/faq/all', {
+            method: 'post',  
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(json => {
+            console.log(json);
+            document.getElementById('faq').innerHTML = "";
+            var index = 0;
+            for (faq of json){
+                index = index + 1;
+                var anchor = document.createElement("A");
+                var text = document.createTextNode(index + '. ' + faq.question);
+                anchor.setAttribute("href", "#");
+
+                anchor.setAttribute("faqId", faq.faqId);
+                anchor.setAttribute("question", faq.question);      
+
+                anchor.appendChild(text);
+                anchor.addEventListener('click', function(event){
+                    showAnswers(this);
+                }, false);
+                var para = document.createElement("p");
+                para.appendChild(anchor);
+                document.getElementById('faq').appendChild(para);
+            }
+        })
+    }
+
+    populateFaqs(domain);
+
+    document.getElementById('answerBox').style.display = "none";
+    document.getElementById('answerBoxCloseButton').addEventListener('click', function(){
+            document.getElementById('answerBox').style.display = "none";
+            }
+    );
+    var currentlyOpenedAnswerBoxfaqId = null;
+    /*========= ANSWER BOX =============*/
+    function showAnswers(obj){
+        faqId = obj.getAttribute("faqId");
+        question = obj.getAttribute("question");
+        var payload = {
+            "faqId" : faqId
+        }
+        fetch('http://localhost:8080/answer/all', {
+            method: 'post',  
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(json => {
+            console.log(json);
+            document.getElementById('questionStatement').innerHTML = question;
+        })
+        currentlyOpenedAnswerBoxfaqId = faqId;
+        document.getElementById("answerBox").style.display = "block";
+    }
+
+
+    document.getElementById('submitAnswerButton').addEventListener('click', function(){
+        var answer = document.getElementById('answerTextArea').value;
+        if(answer.length!=0){
+            console.log("currentlyOpenedAnswerBoxfaqId: " + currentlyOpenedAnswerBoxfaqId)
+            var payload = {
+                "faqId" : currentlyOpenedAnswerBoxfaqId,
+                "answer" : answer
+            }
+            fetch('http://localhost:8080/answer/create', {
+                method: 'post',  
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                  'token': token
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(json => {
+                console.log(json);
+            })
+            
+            document.getElementById("answerTextArea").value = "";
+            window.alert("Your answer has been recorded!");
+            document.getElementById("answerBox").style.display = "none";
+        }
+        }
+    );
+
+
+    function populateBugReports(pageUrl){
+        var payload = {
+            "pageUrl" : pageUrl
+        }
+        fetch('http://localhost:8080/bug/all', {
+            method: 'post',  
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(json => {
+            console.log(json);
+            document.getElementById('bug').innerHTML = "";
+            var index = 0;
+            for (bug of json){
+                index = index + 1;
+                var text = document.createTextNode(index + ". " + bug.bug);
+                var para = document.createElement("p");
+                para.appendChild(text);
+                document.getElementById('bug').appendChild(para);
+            }
+        })
+    }
+
+    populateBugReports(domain);
+
+    document.getElementById('submitSuggestionButton').addEventListener('click', function(){
+        var suggestion = document.getElementById('suggestionTextArea').value;
+        if(suggestion.length!=0){
+            var payload = {
+                "pageUrl" : domain,
+                "suggestion" : suggestion
+            }
+            fetch('http://localhost:8080/suggestion/add', {
+                method: 'post',  
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                  'token': token
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(json => {
+                console.log(json);
+            })
+            
+            document.getElementById("suggestionTextArea").value = "";
+            window.alert("Your suggestion has been recorded!");
+        }
+        }
+    );
+
+    function populateSuggestions(pageUrl){
+        var payload = {
+            "pageUrl" : pageUrl
+        }
+        fetch('http://localhost:8080/suggestion/all', {
+            method: 'post',  
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(json => {
+            console.log(json);
+            document.getElementById('suggestion').innerHTML = "";
+            var index = 0;
+            for (sug of json){
+                index = index + 1;
+                var text = document.createTextNode(index + ". " + sug.suggestions);
+                var para = document.createElement("p");
+                para.appendChild(text);
+                document.getElementById('suggestion').appendChild(para);
+            }
+        })
+    }
+
+    populateSuggestions(domain);    
+
+</script>
+
+</body>
+</html>
