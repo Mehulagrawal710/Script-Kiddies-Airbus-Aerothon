@@ -31,7 +31,7 @@
 	float: right;
 }
 
-.box{
+.my-box{
 	width: 80vw;
 	height: 80vh;
 	position: fixed;
@@ -39,4 +39,25 @@
 	left: 10vw;
 	z-index: 5;
 	box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+}
+
+.card-body h2{text-align: left;}
+
+#populateFaq, #populateAnswer{
+	width: 75vw;
+	height: 40vh;
+	text-align: left;
+}
+
+#answerBoxCloseButton{
+	float: right;
+}
+
+.content-scrollable{
+	overflow-y: scroll;
+}
+
+#dialogflowFrame{
+	width: 70vw;
+	height: 65vh;
 }
