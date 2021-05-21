@@ -6,10 +6,10 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import Aerothon.prototype.dtos.PostAnswerDTO;
@@ -19,6 +19,7 @@ import Aerothon.prototype.repositories.AnswersRepo;
 import Aerothon.prototype.repositories.TokensRepo;
 
 @RestController
+@RequestMapping("/answer")
 public class AnswerController {
 
 	@Autowired
@@ -26,7 +27,7 @@ public class AnswerController {
 	@Autowired
 	TokensRepo tokensRepo;
 
-	@GetMapping("/answer")
+	@PostMapping("/all")
 	public ResponseEntity<Object> getAnswers(@RequestBody Map<String, String> map) {
 		String faqId = map.get("faqId");
 		ArrayList<Answers> answers = answersRepo.findAllByFaqId(faqId);
@@ -37,7 +38,7 @@ public class AnswerController {
 		return new ResponseEntity<>(answerResponse, HttpStatus.OK);
 	}
 
-	@PostMapping("/answer")
+	@PostMapping("/create")
 	public ResponseEntity<Answers> postAnswer(@RequestHeader("token") String token,
 			@RequestBody PostAnswerDTO postAnswerDTO) {
 		Tokens tokenEntry = tokensRepo.findOneByToken(token);
