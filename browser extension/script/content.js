@@ -11,7 +11,7 @@ var floatingButtonsHtml =
 `
 <!--=============== Floating Action Button ===============-->
 <div class="menu pmd-floating-action"  role="navigation">
-	<a id="announcementButton" href="javascript:void(0);" class="pmd-floating-action-btn btn btn-sm pmd-btn-fab pmd-btn-raised pmd-ripple-effect btn-default" data-title="Announcements">
+	<a id="announcementButton" href="javascript:void(0);" class="pmd-floating-action-btn btn btn-sm pmd-btn-fab pmd-btn-raised pmd-ripple-effect btn-default" data-title="Announcements/Page Suggestions">
 		<span class="pmd-floating-hidden">Announcements</span>
 		<i class="fa fa-bullhorn" aria-hidden="true"></i>
 	</a>
@@ -134,11 +134,14 @@ var reputationBoxHtml =
 		</button>
 	</div>
 
-	username: <input id="form-username" type="text" class="form-control" placeholder="Username" required autofocus>
-	password: <input id="form-password" type="password" class="form-control" placeholder="Password" required>
-	email: <input id="form-email" type="email" class="form-control" placeholder="Email" required>
-    <button id="signinButton" class="btn btn-lg btn-primary btn-block text-uppercase">Sign in</button>
-    <button id="signupButton" class="btn btn-lg btn-primary btn-block text-uppercase">Sign up</button>
+	<div id="form-input-fields">
+		<br>
+		<input id="form-username" type="text" class="form-control" placeholder="Username" required autofocus><br>
+		<input id="form-password" type="password" class="form-control" placeholder="Password" required><br>
+		<input id="form-email" type="email" class="form-control" placeholder="Email" required><br>
+	    <button id="signinButton" class="btn btn-lg btn-primary btn-block text-uppercase">Sign in</button>
+	    <button id="signupButton" class="btn btn-lg btn-primary btn-block text-uppercase">Sign up</button>
+	</div>
 
 	<div class="card-body">
 		<h1>Your Score</h1>
@@ -179,12 +182,14 @@ var announcementBoxHtml =
 <!--=============== Announcement Box ===============-->
 <div id="announcementBox" class="card text-center my-box">
 	<div class="card-header">
-		Announcements
+		Announcements / Page Suggestions
 		<button type="button" class="btn btn-sm btn-danger boxClose">
 			<i class="fa fa-times circle" aria-hidden="true"></i>
 		</button>
 	</div>
-	<div id="suggestion">
+	<div class="card-body">
+		<div id="suggestion">
+		</div>
 	</div>
 </div>
 `

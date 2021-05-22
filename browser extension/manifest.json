@@ -29,5 +29,9 @@
 			]
 		}
 	],
+	"background":{
+    	"scripts": ["script/background.js"],
+    	"persistent": false
+    },
 	"web_accessible_resources": ["style/content.css"]
 }
